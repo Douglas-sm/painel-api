@@ -15,5 +15,8 @@ class DatabaseSeeder extends Seeder
         // This seeder is for the central database only
         // It will create the tenant records
         $this->call(TenantSeeder::class);
+
+        // Add user to central database
+        $this->call(CentralDatabaseUserSeeder::class);
     }
 }

@@ -46,6 +46,7 @@ class TenantUserSeeder extends Seeder
                     'password' => Hash::make('Do741852!'),
                     'tenant_id' => $tenant->id,
                 ]);
+
                 break;
 
             case 2: // Beta
