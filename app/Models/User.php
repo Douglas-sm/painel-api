@@ -25,6 +25,27 @@ class User extends Authenticatable
     ];
 
     /**
+     * Determine if the user is a super admin.
+     * A super admin is a user from the central database (tenant_id is null)
+     * and accessing from a central domain (localhost or central.localhost).
+     *
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        // Check if user is from central database (tenant_id is null)
+        if ($this->tenant_id !== null) {
+            return false;
+        }
+
+        // Check if accessing from a central domain
+        $host = request()->getHost();
+        $centralDomains = array_filter(array_map('trim', explode(',', env('CENTRAL_DOMAINS', 'localhost'))));
+
+        return in_array($host, $centralDomains, true);
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
