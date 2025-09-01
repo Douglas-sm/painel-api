@@ -12,6 +12,70 @@ use Illuminate\Support\Facades\Validator;
 class TenantController extends Controller
 {
     /**
+     * List all tenants.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $tenants = Tenant::all();
+
+        return response()->json([
+            'tenants' => $tenants
+        ], 200);
+    }
+
+    /**
+     * Remove the specified tenant.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        try {
+            // Find the tenant
+            $tenant = Tenant::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Tenant not found'
+            ], 404);
+        }
+
+        try {
+            // Start transaction
+            DB::beginTransaction();
+
+            // Get the database name
+            $databaseName = $tenant->database;
+
+            // Drop the tenant's database
+            DB::statement('DROP DATABASE IF EXISTS ' . $databaseName);
+
+            // Delete the tenant record
+            $tenant->delete();
+
+            // Commit transaction
+            DB::commit();
+
+            // Return success response immediately after successful commit
+            return response()->json([
+                'message' => 'Tenant and its database deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Only rollback if transaction is active
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            return response()->json([
+                'message' => 'Error deleting tenant: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Register a new tenant.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -83,13 +147,10 @@ class TenantController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // Rollback transaction in case of error
-            DB::rollBack();
-
             return response()->json([
-                'message' => 'Error registering tenant',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Tenant registered successfully',
+                'tenant' => $tenant
+            ], 201);
         }
     }
 }

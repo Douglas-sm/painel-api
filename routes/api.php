@@ -22,6 +22,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/theme/{prefix}', [\App\Http\Controllers\ThemeController::class, 'getTheme']);
 Route::post('/tenant_register', [\App\Http\Controllers\TenantController::class, 'register']);
+Route::get('/tenants', [\App\Http\Controllers\TenantController::class, 'index']);
+Route::post('/tenants/{id}/delete', [\App\Http\Controllers\TenantController::class, 'destroy']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
