@@ -168,8 +168,9 @@ class TenantController extends Controller
             }
 
             return response()->json([
-                'message' => 'Error registering tenant: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Tenant registered successfully',
+                'tenant' => $tenant
+            ], 201);
         }
     }
 }
