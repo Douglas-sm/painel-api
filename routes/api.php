@@ -21,6 +21,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/theme/{prefix}', [\App\Http\Controllers\ThemeController::class, 'getTheme']);
+Route::get('/tenantTheme/{id}', [\App\Http\Controllers\ThemeController::class, 'getTenantTheme']);
+Route::post('/updateTheme', [\App\Http\Controllers\ThemeController::class, 'updateTheme']);
 Route::post('/tenant_register', [\App\Http\Controllers\TenantController::class, 'register']);
 Route::get('/tenants', [\App\Http\Controllers\TenantController::class, 'index']);
 Route::post('/tenants/{id}/delete', [\App\Http\Controllers\TenantController::class, 'destroy']);
