@@ -94,8 +94,10 @@ class TenantController extends Controller
         }
 
         try {
-            // Start transaction
-            DB::beginTransaction();
+            // Start transaction if not already in one
+            if (DB::transactionLevel() == 0) {
+                DB::beginTransaction();
+            }
 
             // Create tenant record
             $tenant = Tenant::create([
@@ -134,11 +136,24 @@ class TenantController extends Controller
 
             Artisan::call('migrate', $options);
 
+            // Run specific migrations for adding default admin user and theme
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--path' => 'database/migrations/tenant/2025_09_02_103100_add_default_admin_user.php'
+            ]);
+
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--path' => 'database/migrations/tenant/2025_09_02_103200_add_default_theme_colors.php'
+            ]);
+
             // Reset back to the central database connection
             Config::set('database.default', 'mysql');
 
-            // Commit transaction
-            DB::commit();
+            // Commit transaction if active
+            if (DB::transactionLevel() > 0) {
+                DB::commit();
+            }
 
             // Return success response
             return response()->json([
@@ -147,10 +162,14 @@ class TenantController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            // Only rollback if transaction is active
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
             return response()->json([
-                'message' => 'Tenant registered successfully',
-                'tenant' => $tenant
-            ], 201);
+                'message' => 'Error registering tenant: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
