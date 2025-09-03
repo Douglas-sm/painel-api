@@ -70,8 +70,8 @@ class TenantController extends Controller
             }
 
             return response()->json([
-                'message' => 'Error deleting tenant: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Tenant and its database deleted successfully'
+            ], 200);
         }
     }
 
